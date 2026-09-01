@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 220 20% 97%;
+  --foreground: 224 30% 14%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 224 30% 14%;
+
+  --primary: 243 62% 52%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 220 16% 93%;
+  --secondary-foreground: 224 30% 14%;
+
+  --muted: 220 16% 93%;
+  --muted-foreground: 222 12% 45%;
+
+  --accent: 258 60% 60%;
+  --accent-foreground: 0 0% 100%;
+
+  --border: 220 16% 88%;
+
+  --radius: 1rem;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Lexend", "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

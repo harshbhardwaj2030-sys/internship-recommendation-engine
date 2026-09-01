@@ -1,0 +1,151 @@
+// Prisma schema for the Internship Recommendation Engine
+// Run `npx prisma migrate dev --name init` after configuring DATABASE_URL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EducationLevel {
+  FRESHMAN
+  SOPHOMORE
+  JUNIOR
+  SENIOR
+  POST_GRAD
+}
+
+enum LocationType {
+  REMOTE
+  HYBRID
+  ONSITE
+}
+
+enum CompanyTier {
+  STARTUP
+  MID_MARKET
+  ENTERPRISE
+  BIG_TECH
+}
+
+enum InternshipStatus {
+  ACTIVE
+  CLOSED
+}
+
+model User {
+  id                 String     @id @default(uuid())
+  fullName           String
+  email              String     @unique
+  passwordHash       String?
+  image              String?
+  emailVerified      DateTime?
+
+  educationLevel     EducationLevel?
+  major              String?
+  skills             String[]   @default([])
+  domainInterests     String[]   @default([])
+  locationPreference LocationType?
+  targetStipend      Float?
+  portfolioLinks     String[]   @default([])
+
+  onboardingComplete Boolean    @default(false)
+
+  applications       Application[]
+  accounts           Account[]
+  sessions           Session[]
+
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+}
+
+model Company {
+  id                  String       @id @default(uuid())
+  companyName         String
+  logoUrl             String?
+  website             String?
+  industry            String
+  companyTier         CompanyTier
+  headquartersLocation String
+  cultureTags         String[]     @default([])
+
+  internships         Internship[]
+
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+}
+
+model Internship {
+  id              String            @id @default(uuid())
+  companyId       String
+  company         Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  roleTitle       String
+  domain          String
+  requiredSkills  String[]          @default([])
+  locationType    LocationType
+  stipendAmount   Float
+  durationWeeks   Int
+  status          InternshipStatus  @default(ACTIVE)
+  description     String
+
+  applications    Application[]
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([domain])
+  @@index([status])
+}
+
+model Application {
+  id           String     @id @default(uuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  internshipId String
+  internship   Internship @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  matchScore   Float
+  createdAt    DateTime   @default(now())
+
+  @@unique([userId, internshipId])
+}
+
+// --- NextAuth required models ---
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
